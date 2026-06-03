@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SlotCare — Lightweight clinic slot-status control panel for receptionists. Track doctor availability and time slot status with minimal clicks.">
+  <title>SlotCare — Clinic Slot Status</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ===== TOP BAR ===== -->
+  <header id="top-bar">
+    <div class="top-bar-left">
+      <div class="logo">
+        <span class="logo-icon">🏥</span>
+        <h1>Slot<span class="accent">Care</span></h1>
+      </div>
+      <span class="tagline">Slot Status </span>
+    </div>
+    <div class="top-bar-right">
+      <div id="live-clock" class="clock-display"></div>
+      <button id="btn-settings" class="icon-btn" title="Manage Doctors" onclick="openSettings()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== DOCTOR TABS ===== -->
+  <nav id="doctor-tabs">
+    <div class="tabs-scroll">
+      <button class="tab active" data-doctor="all" id="tab-all" onclick="selectDoctor('all')">
+        <span class="tab-icon">👥</span> All Doctors
+      </button>
+      <!-- Doctor tabs are injected here by JS -->
+    </div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main id="main-content">
+    <!-- Slot cards rendered here by JS -->
+  </main>
+
+  <!-- ===== SETTINGS MODAL ===== -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeSettings()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Manage Doctors</h2>
+        <button class="icon-btn" onclick="closeSettings()" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Add Doctor Form -->
+        <div class="add-doctor-form">
+          <h3>Add New Doctor</h3>
+          <div class="form-row">
+            <input type="text" id="input-doctor-name" placeholder="Doctor name (e.g. Dr. Sharma)" class="input-field" onkeydown="if(event.key==='Enter') addDoctor()">
+            <input type="text" id="input-doctor-specialty" placeholder="Specialty (e.g. General)" class="input-field" onkeydown="if(event.key==='Enter') addDoctor()">
+            <button class="btn btn-primary" onclick="addDoctor()" id="btn-add-doctor">+ Add</button>
+          </div>
+        </div>
+
+        <!-- Slot Template -->
+        <div class="slot-template-section">
+          <h3>Default Slot Times</h3>
+          <p class="help-text">These times are applied when a new doctor is added. Edit to customize.</p>
+          <div id="slot-template-list" class="slot-template-list">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="form-row">
+            <input type="time" id="input-slot-time" class="input-field">
+            <button class="btn btn-secondary" onclick="addSlotTemplate()" id="btn-add-slot">+ Add Time</button>
+          </div>
+        </div>
+
+        <!-- Existing Doctors -->
+        <div class="existing-doctors-section">
+          <h3>Current Doctors</h3>
+          <div id="doctor-manage-list" class="doctor-manage-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DOCTOR STATUS MODAL ===== -->
+  <div id="status-modal-overlay" class="modal-overlay hidden" onclick="closeStatusModal()">
+    <div class="modal modal-sm" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="status-modal-title">Doctor Status</h2>
+        <button class="icon-btn" onclick="closeStatusModal()" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="status-options" id="status-options">
+          <button class="status-option available" onclick="setDoctorStatus('available')">
+            <span class="status-dot available"></span> Available
+          </button>
+          <button class="status-option busy" onclick="setDoctorStatus('busy')">
+            <span class="status-dot busy"></span> Busy
+          </button>
+          <button class="status-option delayed" onclick="setDoctorStatus('delayed')">
+            <span class="status-dot delayed"></span> Delayed
+          </button>
+          <button class="status-option on-leave" onclick="setDoctorStatus('on-leave')">
+            <span class="status-dot on-leave"></span> On Leave
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLOT EDIT MODAL ===== -->
+  <div id="slot-edit-modal-overlay" class="modal-overlay hidden" onclick="closeSlotEditModal()">
+    <div class="modal modal-sm" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Slots — <span id="slot-edit-doctor-name"></span></h2>
+        <button class="icon-btn" onclick="closeSlotEditModal()" title="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="slot-edit-list" class="slot-edit-list"></div>
+        <div class="form-row" style="margin-top: 12px;">
+          <input type="time" id="input-new-slot-time" class="input-field">
+          <button class="btn btn-secondary" onclick="addSlotToDoctor()" id="btn-add-slot-to-doctor">+ Add Slot</button>
+        </div>
+        <div class="form-row" style="margin-top: 16px; justify-content: flex-end;">
+          <button class="btn btn-primary" onclick="closeSlotEditModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
